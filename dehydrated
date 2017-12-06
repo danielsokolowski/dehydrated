@@ -818,13 +818,13 @@ sign_domain() {
   # Update symlinks
   [[ "${privkey}" = "privatekey.pem.key" ]] || ln -sf "privatekey-${timestamp}.pem.key" "${certdir}/privatekey.pem.key"
 
-  ln -sf "chain-${timestamp}.pem.crt" "${certdir}/chain.pem"
+  ln -sf "chain-${timestamp}.pem.crt" "${certdir}/chain.pem.crt"
   ln -sf "fullchain-${timestamp}.pem.crt" "${certdir}/fullchain.pem.crt"
   ln -sf "cert-${timestamp}.pem.csr" "${certdir}/cert.pem.csr"
   ln -sf "cert-${timestamp}.pem.crt" "${certdir}/cert.pem.crt"
 
   # Wait for hook script to clean the challenge and to deploy cert if used
-  [[ -n "${HOOK}" ]] && "${HOOK}" "deploy_cert" "${domain}" "${certdir}/privatekey.pem.key" "${certdir}/cert.pem.crt" "${certdir}/fullchain.pem.crt" "${certdir}/chain.pem" "${timestamp}"
+  [[ -n "${HOOK}" ]] && "${HOOK}" "deploy_cert" "${domain}" "${certdir}/privatekey.pem.key" "${certdir}/cert.pem.crt" "${certdir}/fullchain.pem.crt" "${certdir}/chain.pem.crt" "${timestamp}"
 
   unset challenge_token
   echo " + Done!"
@@ -940,7 +940,7 @@ command_sign_domains() {
     morenames="$(printf '%s\n' "${line}" | cut -s -d' ' -f2-)"
     local certdir="${CERTDIR}/${domain}"
     cert="${certdir}/cert.pem.crt"
-    chain="${certdir}/chain.pem"
+    chain="${certdir}/chain.pem.crt"
 
     force_renew="${PARAM_FORCE:-no}"
 
@@ -1023,7 +1023,7 @@ command_sign_domains() {
         else
           # Certificate-Names unchanged and cert is still valid
           echo "Skipping renew!"
-          [[ -n "${HOOK}" ]] && "${HOOK}" "unchanged_cert" "${domain}" "${certdir}/privatekey.pem.key" "${certdir}/cert.pem.crt" "${certdir}/fullchain.pem.crt" "${certdir}/chain.pem"
+          [[ -n "${HOOK}" ]] && "${HOOK}" "unchanged_cert" "${domain}" "${certdir}/privatekey.pem.key" "${certdir}/cert.pem.crt" "${certdir}/fullchain.pem.crt" "${certdir}/chain.pem.crt"
           skip="yes"
         fi
       else
@@ -1185,7 +1185,7 @@ command_cleanup() {
     fi
 
     # Loop over file-types (certificates, keys, signing-requests, ...)
-    for filetype in cert.pem.csr cert.pem.crt chain.pem fullchain.pem.crt privatekey.pem.key ocsp.der; do
+    for filetype in cert.pem.csr cert.pem.crt chain.pem.crt fullchain.pem.crt privatekey.pem.key ocsp.der; do
       # Skip if symlink is broken
       [[ -r "${certdir}/${filetype}" ]] || continue
 
